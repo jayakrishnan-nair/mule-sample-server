@@ -6,6 +6,8 @@ The API is built as a Mule flow with REST component. This exposes the service us
 
 API-Toolkit features are not used here.
 
+The RAML files are kept at "/sample/src/main/api" folder.
+
 The Customer entity is denied in com.raml.sample.service.CustomerService.java
 
 The saving, updating, retreival of entity is done using a DAO pattern. 
