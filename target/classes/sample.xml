@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:jersey="http://www.mulesoft.org/schema/mule/jersey" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/jersey http://www.mulesoft.org/schema/mule/jersey/current/mule-jersey.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd">
+    
+    <http:listener-config name="HTTP_Listener_Configuration" host="0.0.0.0" port="8081" doc:name="HTTP Listener Configuration"/>
+    <flow name="sampleFlow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/*"  doc:name="HTTP"/>
+        <logger message="#[message.inboundProperties.'http.request.uri']" level="INFO" doc:name="Logger"/>
+        <jersey:resources doc:name="REST">
+            <component class="com.raml.sample.service.CustomerService"/>
+        </jersey:resources>
+        <logger message="#[message.payloadAs(java.lang.String)]" level="INFO" doc:name="Logger"/>
+        <catch-exception-strategy doc:name="Catch Exception Strategy" >
+            <!--  catch any generic exceptions and  route it to exception handling flow-->
+            <flow-ref name="exceptionFlow" doc:name="Flow Reference"/>
+        </catch-exception-strategy>
+    </flow>
+    <flow name="exceptionFlow">
+    <!-- The Exception should be handled here. The payload is logged here -->
+        <logger message="#['Exception occured in the flow..'+message.payloadAs(java.lang.String)]" level="ERROR" doc:name="Logger"/>
+    </flow>
+</mule>

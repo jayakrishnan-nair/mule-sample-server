@@ -1,0 +1,85 @@
+#%RAML 1.0
+title: customer
+baseUri: http://www.test.com/sample/{version}
+version: v1
+mediaType: application/json
+
+securitySchemes:
+  outh2Security: !include security/oauth2-security.raml
+uses:
+  Customers: lib/customers.raml
+
+traits:
+  
+  cached: !include traits/cacheable.raml
+
+/customers:
+    securedBy: [outh2Security]
+    get:
+      is: [paged, cached]
+      description: Returns all customers.
+      queryParameters:
+        postCode:
+          type: string
+          description: use to query all customers in an area(postCode)
+          required: false
+          example: "2135"
+        lastName:
+          type: string
+          description: use to query customers with a last name
+          required: false
+          example: "krish"
+      responses:
+          200:
+            body:
+              application/json:
+                type: Customers.customers
+                example: !include examples/customers.json
+
+    post:
+        is: [cached]
+        description: Create a new single Customer.
+        body:
+          application/json:
+            type: Customers.customer
+            example: !include examples/customer.json
+        responses:
+          201:
+            description: New Customer created
+          409:
+            body:  Customer already exists with same id.
+
+    /{id}:
+        securedBy: [outh2Security]
+        is: [cached]
+        get:
+          description: Returns a customer with {id}.
+          responses:
+              200:
+                body:
+                  application/json:
+                    type: Customers.customer
+                    example: !include examples/customer.json
+              404:
+                body: Customer not found.
+        put:
+            description: Update a Customer by id
+            body:
+              application/json:
+                type: Customers.customer
+                example: !include examples/customer.json
+            responses:
+              200:
+                body:
+                  application/json:
+                    type: customer
+                    example: !include examples/customer.json
+              404:
+                description: Customer not found.
+        delete:
+              description: Delete a Customer by id
+              responses:
+                200:
+                  description: Customer successfully deleted
+                404:
+                  description: Customer not found.
